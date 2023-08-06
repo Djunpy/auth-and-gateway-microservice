@@ -45,3 +45,28 @@ INSERT INTO phones (
 ) VALUES ($1, $2, $3)
 RETURNING *;
 
+-- name: UpdateUserPhone :one
+UPDATE phones
+SET
+    number = COALESCE(sqlc.narg('number'), number),
+    country_code = COALESCE(sqlc.narg('country_code'), country_code)
+WHERE user_id = sqlc.arg('user_id') OR number = sqlc.arg('old_number')
+RETURNING *;
+
+-- name: CreateUserAddress :one
+INSERT INTO address(
+    user_id,
+    city,
+    street,
+    postal_code
+)VALUES ($1,$2,$3,$4)
+RETURNING *;
+
+-- name: UpdateUserAddress :one
+UPDATE address
+SET
+    city = COALESCE(sqlc.narg('city'), city),
+    street = COALESCE(sqlc.narg('street'), street),
+    postal_code = COALESCE(sqlc.narg('postal_code'), postal_code)
+WHERE user_id = sqlc.arg('user_id')
+RETURNING *;

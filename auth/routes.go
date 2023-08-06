@@ -15,7 +15,7 @@ func NewRoutes(c *Controller, store *db.Store) Routes {
 }
 
 func (r *Routes) AuthRoute(rg *gin.RouterGroup) {
-	router := rg.Group("/accounts")
+	router := rg.Group("/auth")
 	router.POST("/sign-up", r.controller.SignUpUser)
 	router.POST("/sign-in", r.controller.SignInUser)
 	router.POST("/refresh-access-token", r.controller.RefreshAccessToken)

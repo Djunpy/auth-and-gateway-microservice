@@ -27,6 +27,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
 	}
+	if q.createUserAddressStmt, err = db.PrepareContext(ctx, createUserAddress); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateUserAddress: %w", err)
+	}
 	if q.createUserPhoneStmt, err = db.PrepareContext(ctx, createUserPhone); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUserPhone: %w", err)
 	}
@@ -42,6 +45,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
 	}
+	if q.updateUserAddressStmt, err = db.PrepareContext(ctx, updateUserAddress); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserAddress: %w", err)
+	}
+	if q.updateUserPhoneStmt, err = db.PrepareContext(ctx, updateUserPhone); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserPhone: %w", err)
+	}
 	return &q, nil
 }
 
@@ -50,6 +59,11 @@ func (q *Queries) Close() error {
 	if q.createUserStmt != nil {
 		if cerr := q.createUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
+		}
+	}
+	if q.createUserAddressStmt != nil {
+		if cerr := q.createUserAddressStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createUserAddressStmt: %w", cerr)
 		}
 	}
 	if q.createUserPhoneStmt != nil {
@@ -75,6 +89,16 @@ func (q *Queries) Close() error {
 	if q.updateUserStmt != nil {
 		if cerr := q.updateUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
+		}
+	}
+	if q.updateUserAddressStmt != nil {
+		if cerr := q.updateUserAddressStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserAddressStmt: %w", cerr)
+		}
+	}
+	if q.updateUserPhoneStmt != nil {
+		if cerr := q.updateUserPhoneStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserPhoneStmt: %w", cerr)
 		}
 	}
 	return err
@@ -117,11 +141,14 @@ type Queries struct {
 	db                    DBTX
 	tx                    *sql.Tx
 	createUserStmt        *sql.Stmt
+	createUserAddressStmt *sql.Stmt
 	createUserPhoneStmt   *sql.Stmt
 	getUserByEmailStmt    *sql.Stmt
 	getUserByIdStmt       *sql.Stmt
 	getUserByUsernameStmt *sql.Stmt
 	updateUserStmt        *sql.Stmt
+	updateUserAddressStmt *sql.Stmt
+	updateUserPhoneStmt   *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -129,10 +156,13 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		db:                    tx,
 		tx:                    tx,
 		createUserStmt:        q.createUserStmt,
+		createUserAddressStmt: q.createUserAddressStmt,
 		createUserPhoneStmt:   q.createUserPhoneStmt,
 		getUserByEmailStmt:    q.getUserByEmailStmt,
 		getUserByIdStmt:       q.getUserByIdStmt,
 		getUserByUsernameStmt: q.getUserByUsernameStmt,
 		updateUserStmt:        q.updateUserStmt,
+		updateUserAddressStmt: q.updateUserAddressStmt,
+		updateUserPhoneStmt:   q.updateUserPhoneStmt,
 	}
 }

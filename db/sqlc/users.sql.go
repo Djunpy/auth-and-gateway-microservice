@@ -68,6 +68,41 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const createUserAddress = `-- name: CreateUserAddress :one
+INSERT INTO address(
+    user_id,
+    city,
+    street,
+    postal_code
+)VALUES ($1,$2,$3,$4)
+RETURNING id, user_id, city, street, postal_code
+`
+
+type CreateUserAddressParams struct {
+	UserID     int32          `json:"user_id"`
+	City       string         `json:"city"`
+	Street     sql.NullString `json:"street"`
+	PostalCode sql.NullInt64  `json:"postal_code"`
+}
+
+func (q *Queries) CreateUserAddress(ctx context.Context, arg CreateUserAddressParams) (Address, error) {
+	row := q.queryRow(ctx, q.createUserAddressStmt, createUserAddress,
+		arg.UserID,
+		arg.City,
+		arg.Street,
+		arg.PostalCode,
+	)
+	var i Address
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.City,
+		&i.Street,
+		&i.PostalCode,
+	)
+	return i, err
+}
+
 const createUserPhone = `-- name: CreateUserPhone :one
 INSERT INTO phones (
     user_id,
@@ -79,7 +114,7 @@ RETURNING id, user_id, number, country_code, verified, create_at
 
 type CreateUserPhoneParams struct {
 	UserID      int32  `json:"user_id"`
-	Number      int32  `json:"number"`
+	Number      int64  `json:"number"`
 	CountryCode string `json:"country_code"`
 }
 
@@ -228,6 +263,76 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.AuthSource,
 		&i.UpdateAt,
 		&i.DateJoined,
+	)
+	return i, err
+}
+
+const updateUserAddress = `-- name: UpdateUserAddress :one
+UPDATE address
+SET
+    city = COALESCE($1, city),
+    street = COALESCE($2, street),
+    postal_code = COALESCE($3, postal_code)
+WHERE user_id = $4
+RETURNING id, user_id, city, street, postal_code
+`
+
+type UpdateUserAddressParams struct {
+	City       sql.NullString `json:"city"`
+	Street     sql.NullString `json:"street"`
+	PostalCode sql.NullInt64  `json:"postal_code"`
+	UserID     int32          `json:"user_id"`
+}
+
+func (q *Queries) UpdateUserAddress(ctx context.Context, arg UpdateUserAddressParams) (Address, error) {
+	row := q.queryRow(ctx, q.updateUserAddressStmt, updateUserAddress,
+		arg.City,
+		arg.Street,
+		arg.PostalCode,
+		arg.UserID,
+	)
+	var i Address
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.City,
+		&i.Street,
+		&i.PostalCode,
+	)
+	return i, err
+}
+
+const updateUserPhone = `-- name: UpdateUserPhone :one
+UPDATE phones
+SET
+    number = COALESCE($1, number),
+    country_code = COALESCE($2, country_code)
+WHERE user_id = $3 OR number = $4
+RETURNING id, user_id, number, country_code, verified, create_at
+`
+
+type UpdateUserPhoneParams struct {
+	Number      sql.NullInt64  `json:"number"`
+	CountryCode sql.NullString `json:"country_code"`
+	UserID      int32          `json:"user_id"`
+	OldNumber   int64          `json:"old_number"`
+}
+
+func (q *Queries) UpdateUserPhone(ctx context.Context, arg UpdateUserPhoneParams) (Phone, error) {
+	row := q.queryRow(ctx, q.updateUserPhoneStmt, updateUserPhone,
+		arg.Number,
+		arg.CountryCode,
+		arg.UserID,
+		arg.OldNumber,
+	)
+	var i Phone
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Number,
+		&i.CountryCode,
+		&i.Verified,
+		&i.CreateAt,
 	)
 	return i, err
 }

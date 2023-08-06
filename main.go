@@ -1,6 +1,7 @@
 package main
 
 import (
+	"auth-and-gateway-microservice/accounts"
 	"auth-and-gateway-microservice/auth"
 	db "auth-and-gateway-microservice/db/sqlc"
 	"auth-and-gateway-microservice/logging"
@@ -19,11 +20,13 @@ import (
 )
 
 var (
-	store          *db.Store
-	logger         logging.Logger
-	ctx            context.Context
-	authController *auth.Controller
-	authRoutes     auth.Routes
+	store              *db.Store
+	logger             logging.Logger
+	ctx                context.Context
+	authController     *auth.Controller
+	accountsController *accounts.Controller
+	authRoutes         auth.Routes
+	accountsRoutes     accounts.Routes
 )
 
 func init() {
@@ -44,7 +47,9 @@ func init() {
 	}
 	store = db.NewStore(conn)
 	authController = auth.NewController(store)
+	accountsController = accounts.NewController(store)
 	authRoutes = auth.NewRoutes(authController, store)
+	accountsRoutes = accounts.NewRoutes(accountsController, store)
 }
 
 func main() {
@@ -71,6 +76,7 @@ func setupRouter() *gin.Engine {
 	v1 := router.Group("/v1")
 	apiV1 := v1.Group("/api")
 	authRoutes.AuthRoute(apiV1)
+	accountsRoutes.AccountsRoute(apiV1)
 	return router
 }
 

@@ -19,7 +19,7 @@ CREATE TABLE users (
 CREATE TABLE phones (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
-    number INTEGER NOT NULL,
+    number BIGINT NOT NULL,
     country_code VARCHAR(30) NOT NULL,
     verified BOOL DEFAULT false,
     create_at TIMESTAMPTZ DEFAULT NOW(),
@@ -126,4 +126,13 @@ CREATE TABLE reply_to_ratings (
   create_at TIMESTAMPTZ DEFAULT NOW(),
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (rating_id) REFERENCES user_ratings(id)
+);
+
+CREATE TABLE address (
+    id SERIAL PRIMARY KEY,
+    user_id integer NOT NULL UNIQUE,
+    city VARCHAR(100) NOT NULL,
+    street VARCHAR(100),
+    postal_code BIGINT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );

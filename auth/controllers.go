@@ -64,7 +64,7 @@ func (ac *Controller) SignInUser(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusOK, utils.ErrorResponse(tErr.Code, tErr.Error()))
 		return
 	}
-	userPayload := UserPayloadToCookie(user)
+	userPayload := db.UserPayloadToCookie(user)
 	accessToken, err := utils.CreateToken(config.JwtAccessExpiredIn, userPayload, "access", config.JwtAccessTokenPrivateKey)
 	if err != nil {
 		tErr := custom_errors.TranslateError(err)
@@ -104,19 +104,20 @@ func (ac *Controller) RefreshAccessToken(ctx *gin.Context) {
 		return
 	}
 	tokenPayload := sub.(map[string]interface{})
-	user, err := ac.store.GetUserById(ctx, int32(tokenPayload["UserId"].(float64)))
+	user, err := ac.store.GetUserById(ctx, int32(tokenPayload["user_id"].(float64)))
 	if err != nil {
 		tErr := custom_errors.TranslateError(err)
 		ctx.AbortWithStatusJSON(http.StatusOK, utils.ErrorResponse(tErr.Code, tErr.Error()))
 		return
 	}
-	userPayload := UserPayloadToCookie(user)
+	userPayload := db.UserPayloadToCookie(user)
 	accessToken, err := utils.CreateToken(config.JwtAccessExpiredIn, userPayload, "access", config.JwtAccessTokenPrivateKey)
 	if err != nil {
 		tErr := custom_errors.TranslateError(err)
 		ctx.AbortWithStatusJSON(http.StatusOK, utils.ErrorResponse(tErr.Code, tErr.Error()))
 		return
 	}
+
 	ctx.SetCookie("access_token", accessToken, config.JwtAccessMaxAge*60, "/", "localhost", false, true)
 	ctx.SetCookie("logged_in", "true", config.JwtAccessMaxAge*60, "/", "localhost", false, false)
 	ctx.JSON(http.StatusOK, gin.H{"msg": "success", "code": 200})

@@ -7,8 +7,9 @@ import (
 )
 
 type UserPhone struct {
-	Number      int32  `json:"number"`
-	CountryCode string `json:"country_code"`
+	Number      int64  `json:"number"`
+	CountryCode string `json:"country_code,omitempty"`
+	OldNumber   int64  `json:"old_number,omitempty"`
 }
 
 type CreateUserTxParams struct {

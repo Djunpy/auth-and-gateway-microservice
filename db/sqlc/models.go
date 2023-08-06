@@ -8,6 +8,14 @@ import (
 	"database/sql"
 )
 
+type Address struct {
+	ID         int32          `json:"id"`
+	UserID     int32          `json:"user_id"`
+	City       string         `json:"city"`
+	Street     sql.NullString `json:"street"`
+	PostalCode sql.NullInt64  `json:"postal_code"`
+}
+
 type Chat struct {
 	ID        int32        `json:"id"`
 	IsDeleted sql.NullBool `json:"is_deleted"`
@@ -64,7 +72,7 @@ type Permission struct {
 type Phone struct {
 	ID          int32        `json:"id"`
 	UserID      int32        `json:"user_id"`
-	Number      int32        `json:"number"`
+	Number      int64        `json:"number"`
 	CountryCode string       `json:"country_code"`
 	Verified    sql.NullBool `json:"verified"`
 	CreateAt    sql.NullTime `json:"create_at"`
