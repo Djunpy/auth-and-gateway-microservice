@@ -1,0 +1,5 @@
+[31m[FATAL][0m: 2023-07-29 14:07:51 - could not connect to postgres database: sql: unknown driver "postgres" (forgotten import?) | file=main.go:33 func=main.init.0()[0m
+[32m[INFO][0m: 2023-07-29 14:31:52 - hello world | file=main.go:36 func=main.init.0()[0m
+[32m[INFO][0m: 2023-07-29 14:32:22 - hello | file=main.go:55 func=main.main()[0m
+[31m[FATAL][0m: 2023-08-05 20:42:56 - could not ping to postgres database: dial tcp 127.0.0.1:5433: connect: connection refused | file=main.go:43 func=main.init.0()[0m
+[31m[FATAL][0m: 2023-08-06 08:26:01 - could not ping to postgres database: dial tcp 127.0.0.1:5433: connect: connection refused | file=main.go:43 func=main.init.0()[0m
