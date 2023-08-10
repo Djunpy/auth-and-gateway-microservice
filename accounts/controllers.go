@@ -128,3 +128,13 @@ func (ac *Controller) UpdateAccount(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"code": 200, "msg": "success"})
 }
+
+func (ac *Controller) CreateChat(ctx *gin.Context) {
+	var payload *db.CustomMessage
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusOK, utils.ErrorResponse(utils.INVALID_DATA, err.Error()))
+		return
+	}
+	currentUser, _ := ctx.MustGet("User").(db.UserPayload)
+
+}

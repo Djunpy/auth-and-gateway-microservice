@@ -24,6 +24,24 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.addFileToMessageStmt, err = db.PrepareContext(ctx, addFileToMessage); err != nil {
+		return nil, fmt.Errorf("error preparing query AddFileToMessage: %w", err)
+	}
+	if q.addUserToChatStmt, err = db.PrepareContext(ctx, addUserToChat); err != nil {
+		return nil, fmt.Errorf("error preparing query AddUserToChat: %w", err)
+	}
+	if q.createChatStmt, err = db.PrepareContext(ctx, createChat); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateChat: %w", err)
+	}
+	if q.createFileStmt, err = db.PrepareContext(ctx, createFile); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateFile: %w", err)
+	}
+	if q.createMessageStmt, err = db.PrepareContext(ctx, createMessage); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateMessage: %w", err)
+	}
+	if q.createMessageStatusStmt, err = db.PrepareContext(ctx, createMessageStatus); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateMessageStatus: %w", err)
+	}
 	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
 	}
@@ -33,6 +51,15 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createUserPhoneStmt, err = db.PrepareContext(ctx, createUserPhone); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUserPhone: %w", err)
 	}
+	if q.deleteChatFromUserStmt, err = db.PrepareContext(ctx, deleteChatFromUser); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteChatFromUser: %w", err)
+	}
+	if q.deleteFileStmt, err = db.PrepareContext(ctx, deleteFile); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteFile: %w", err)
+	}
+	if q.getChatByUsersStmt, err = db.PrepareContext(ctx, getChatByUsers); err != nil {
+		return nil, fmt.Errorf("error preparing query GetChatByUsers: %w", err)
+	}
 	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
 	}
@@ -41,6 +68,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getUserByUsernameStmt, err = db.PrepareContext(ctx, getUserByUsername); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserByUsername: %w", err)
+	}
+	if q.updateMessageStmt, err = db.PrepareContext(ctx, updateMessage); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateMessage: %w", err)
 	}
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
@@ -56,6 +86,36 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.addFileToMessageStmt != nil {
+		if cerr := q.addFileToMessageStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addFileToMessageStmt: %w", cerr)
+		}
+	}
+	if q.addUserToChatStmt != nil {
+		if cerr := q.addUserToChatStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addUserToChatStmt: %w", cerr)
+		}
+	}
+	if q.createChatStmt != nil {
+		if cerr := q.createChatStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createChatStmt: %w", cerr)
+		}
+	}
+	if q.createFileStmt != nil {
+		if cerr := q.createFileStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createFileStmt: %w", cerr)
+		}
+	}
+	if q.createMessageStmt != nil {
+		if cerr := q.createMessageStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createMessageStmt: %w", cerr)
+		}
+	}
+	if q.createMessageStatusStmt != nil {
+		if cerr := q.createMessageStatusStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createMessageStatusStmt: %w", cerr)
+		}
+	}
 	if q.createUserStmt != nil {
 		if cerr := q.createUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
@@ -71,6 +131,21 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createUserPhoneStmt: %w", cerr)
 		}
 	}
+	if q.deleteChatFromUserStmt != nil {
+		if cerr := q.deleteChatFromUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteChatFromUserStmt: %w", cerr)
+		}
+	}
+	if q.deleteFileStmt != nil {
+		if cerr := q.deleteFileStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteFileStmt: %w", cerr)
+		}
+	}
+	if q.getChatByUsersStmt != nil {
+		if cerr := q.getChatByUsersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getChatByUsersStmt: %w", cerr)
+		}
+	}
 	if q.getUserByEmailStmt != nil {
 		if cerr := q.getUserByEmailStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserByEmailStmt: %w", cerr)
@@ -84,6 +159,11 @@ func (q *Queries) Close() error {
 	if q.getUserByUsernameStmt != nil {
 		if cerr := q.getUserByUsernameStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserByUsernameStmt: %w", cerr)
+		}
+	}
+	if q.updateMessageStmt != nil {
+		if cerr := q.updateMessageStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateMessageStmt: %w", cerr)
 		}
 	}
 	if q.updateUserStmt != nil {
@@ -138,31 +218,51 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                    DBTX
-	tx                    *sql.Tx
-	createUserStmt        *sql.Stmt
-	createUserAddressStmt *sql.Stmt
-	createUserPhoneStmt   *sql.Stmt
-	getUserByEmailStmt    *sql.Stmt
-	getUserByIdStmt       *sql.Stmt
-	getUserByUsernameStmt *sql.Stmt
-	updateUserStmt        *sql.Stmt
-	updateUserAddressStmt *sql.Stmt
-	updateUserPhoneStmt   *sql.Stmt
+	db                      DBTX
+	tx                      *sql.Tx
+	addFileToMessageStmt    *sql.Stmt
+	addUserToChatStmt       *sql.Stmt
+	createChatStmt          *sql.Stmt
+	createFileStmt          *sql.Stmt
+	createMessageStmt       *sql.Stmt
+	createMessageStatusStmt *sql.Stmt
+	createUserStmt          *sql.Stmt
+	createUserAddressStmt   *sql.Stmt
+	createUserPhoneStmt     *sql.Stmt
+	deleteChatFromUserStmt  *sql.Stmt
+	deleteFileStmt          *sql.Stmt
+	getChatByUsersStmt      *sql.Stmt
+	getUserByEmailStmt      *sql.Stmt
+	getUserByIdStmt         *sql.Stmt
+	getUserByUsernameStmt   *sql.Stmt
+	updateMessageStmt       *sql.Stmt
+	updateUserStmt          *sql.Stmt
+	updateUserAddressStmt   *sql.Stmt
+	updateUserPhoneStmt     *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                    tx,
-		tx:                    tx,
-		createUserStmt:        q.createUserStmt,
-		createUserAddressStmt: q.createUserAddressStmt,
-		createUserPhoneStmt:   q.createUserPhoneStmt,
-		getUserByEmailStmt:    q.getUserByEmailStmt,
-		getUserByIdStmt:       q.getUserByIdStmt,
-		getUserByUsernameStmt: q.getUserByUsernameStmt,
-		updateUserStmt:        q.updateUserStmt,
-		updateUserAddressStmt: q.updateUserAddressStmt,
-		updateUserPhoneStmt:   q.updateUserPhoneStmt,
+		db:                      tx,
+		tx:                      tx,
+		addFileToMessageStmt:    q.addFileToMessageStmt,
+		addUserToChatStmt:       q.addUserToChatStmt,
+		createChatStmt:          q.createChatStmt,
+		createFileStmt:          q.createFileStmt,
+		createMessageStmt:       q.createMessageStmt,
+		createMessageStatusStmt: q.createMessageStatusStmt,
+		createUserStmt:          q.createUserStmt,
+		createUserAddressStmt:   q.createUserAddressStmt,
+		createUserPhoneStmt:     q.createUserPhoneStmt,
+		deleteChatFromUserStmt:  q.deleteChatFromUserStmt,
+		deleteFileStmt:          q.deleteFileStmt,
+		getChatByUsersStmt:      q.getChatByUsersStmt,
+		getUserByEmailStmt:      q.getUserByEmailStmt,
+		getUserByIdStmt:         q.getUserByIdStmt,
+		getUserByUsernameStmt:   q.getUserByUsernameStmt,
+		updateMessageStmt:       q.updateMessageStmt,
+		updateUserStmt:          q.updateUserStmt,
+		updateUserAddressStmt:   q.updateUserAddressStmt,
+		updateUserPhoneStmt:     q.updateUserPhoneStmt,
 	}
 }

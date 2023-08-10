@@ -16,6 +16,9 @@ type UserAddress struct {
 	PostalCode int64  `json:"postal_code"`
 }
 
+type CreateChat struct {
+}
+
 func ResponseUserAddress(address db.Address) UserAddress {
 	return UserAddress{
 		City:       address.City,
